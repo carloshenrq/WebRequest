@@ -1,4 +1,13 @@
 <?php
+/**
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 
 namespace WebRequest;
 
@@ -15,14 +24,6 @@ trait TGlobal
     protected static $class = null;
 
     /**
-     * Registra o objeto para a classe para ser utilizado globalmente.
-     */
-    protected function registerGlobal($obj)
-    {
-        self::$class = $obj;
-    }
-
-    /**
      * Obtém a instância global da classe a qual foi invocada.
      *
      * @throws \Exception Caso não tenha sido definido a instância global.
@@ -33,7 +34,8 @@ trait TGlobal
     {
         if(is_null(self::$class) === true)
         {
-            throw new \Exception('Referência de objeto não encontrada.');
+            $called_class = get_called_class();
+            self::$class = new $called_class();
         }
 
         return self::$class;

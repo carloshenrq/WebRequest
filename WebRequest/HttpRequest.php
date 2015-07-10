@@ -1,4 +1,13 @@
 <?php
+/**
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 
 namespace WebRequest;
 
@@ -12,36 +21,65 @@ abstract class HttpRequest implements IHttpRequest
     use TGlobal;
 
     /**
-     * Returna a requisição executada em formato XML.
-     *
-     * @param string $url Caminho que será realizada a requisição.
-     * @param string $method Tipo de cabeçalho que será informado na requisição. (Padrão: GET)
-     * @param array $data Dados que serão enviados pela requisição. (Padrão: Sem dados)
-     * @param array $header Informação de cabeçalho adicionais que serão utilizadas. (Padrão: Sem dados)
-     *
-     * @final
-     *
-     * @return \SimpleXMLElement
+     * @see IHttpRequest::parseReturn()
      */
-    final public function xmlExecute($url, $method = 'GET', $data = [], $header = [])
+    final public function parseReturn($returnData, $format = 'json')
     {
-        return simplexml_load_string($this->execute($url, $method, $data, $header));
+        return (($format == 'text') ? $returnData : 
+                    (($format == 'json') ? json_decode($returnData) : 
+                        (($format == 'xml') ? simplexml_load_string($returnData):null)));
     }
 
     /**
-     * Retorna a requisição executada em formato JSON.
-     *
-     * @param string $url Caminho que será realizada a requisição.
-     * @param string $method Tipo de cabeçalho que será informado na requisição. (Padrão: GET)
-     * @param array $data Dados que serão enviados pela requisição. (Padrão: Sem dados)
-     * @param array $header Informação de cabeçalho adicionais que serão utilizadas. (Padrão: Sem dados)
-     *
-     * @final
-     *
-     * @return object
+     * @see IHttpRequest::get()
      */
-    public function jsonExecute($url, $method = 'GET', $data = [], $header = [])
+    final public function get($url, $data = [], $format = 'json')
     {
-        return json_decode($this->execute($url, $method, $data, $header));
+        return $this->parseReturn($this->execute($url, $data), $format);
+    }
+
+    /**
+     * @see IHttpRequest::post()
+     */
+    final public function post($url, $data = [], $format = 'json')
+    {
+        return $this->parseReturn($this->execute($url, $data, 'POST',
+                ['Content-Type: application/x-www-form-urlencoded']), $format);
+    }
+
+    /**
+     * @see IHttpRequest::put()
+     */
+    final public function put($url, $data = [], $format = 'json')
+    {
+        return $this->parseReturn($this->execute($url, $data, 'PUT',
+                ['Content-Type: application/x-www-form-urlencoded']), $format);
+    }
+
+    /**
+     * @see IHttpRequest::delete()
+     */
+    final public function delete($url, $data = [], $format = 'json')
+    {
+        return $this->parseReturn($this->execute($url, $data, 'DELETE',
+                ['Content-Type: application/x-www-form-urlencoded']), $format);
+    }
+
+    /**
+     * Cria a instância para as requisições.
+     * Tentará criar a instância para o cURL, caso não consiga, irá criar pelo Stream.
+     *
+     * @return IHttpRequest
+     */
+    public static function createInstance()
+    {
+        try
+        {
+            return cURL::getInstance();
+        }
+        catch(\Exception $ex)
+        {
+            return Stream::getInstance();
+        }
     }
 }
