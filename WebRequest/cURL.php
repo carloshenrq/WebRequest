@@ -36,6 +36,13 @@ class cURL extends HttpRequest
         // Inicializa o gancho para o cURL executar.
         $cl = curl_init();
 
+        // Se a requisição for do tipo GET, adiciona ao URL os dados informados.
+        if($method == 'GET')
+        {
+            // Adiciona os parametros ao final da URL.
+            $url .= '?' . http_build_query($data);
+        }
+
         // Define as opções principais do cURL.
         curl_setopt($cl, CURLOPT_URL, $url);
         curl_setopt($cl, CURLOPT_CUSTOMREQUEST, $method); // Para os métodos de execução.
